@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.zucc.mapper.EmployeeMapper">
+
+
+    <insert id="addEmployee" parameterType="employee" useGeneratedKeys="true" keyProperty="empId">
+        INSERT INTO employee
+        (emp_name,email,gender,phone,hire_date,dept_id)
+        VALUES
+        (#{empName},#{email},#{gender},#{phone},#{hireDate},#{department.deptId})
+    </insert>
+
+    <update id="updateEmployee" parameterType="employee">
+        UPDATE employee
+        <set>
+            <if test="empName!=null">emp_name=#{empName},</if>
+            <if test="email!=null">email=#{email},</if>
+            <if test="gender!=null">gender=#{gender},</if>
+            <if test="phone!=null">phone=#{phone},</if>
+            <if test="hireDate!=null">hire_date=#{hireDate},</if>
+            <if test="department!=null and department.deptId!=null">dept_id=#{department.deptId}</if>
+        </set>
+        <where>
+            emp_id=#{empId}
+        </where>
+    </update>
+
+    <delete id="deleteEmployeeByEmpId" parameterType="int">
+        DELETE FROM employee WHERE  emp_id=#{empId}
+    </delete>
+
+
+    <resultMap id="empMap" type="employee">
+        <id column="emp_id" property="empId"></id>
+        <result column="emp_name" property="empName"></result>
+        <result column="email" property="email"></result>
+        <result column="gender" property="gender"></result>
+        <result column="phone" property="phone"></result>
+        <result column="hire_date" property="hireDate"></result>
+        <association property="department" javaType="department">
+            <id column="dept_id" property="deptId"></id>
+            <result column="dept_name" property="deptName"></result>
+        </association>
+    </resultMap>
+
+    <!--根据员工ID查询员工信息-->
+    <select id="getEmployeeByEmpId" parameterType="int" resultMap="empMap">
+        SELECT * FROM employee e,department d WHERE e.dept_id=d.dept_id AND e.emp_id=#{empId}
+    </select>
+
+
+    <resultMap id="empMap_" type="employee">
+        <id column="emp_id" property="empId"></id>
+        <result column="emp_name" property="empName"></result>
+        <result column="email" property="email"></result>
+        <result column="gender" property="gender"></result>
+        <result column="phone" property="phone"></result>
+        <result column="hire_date" property="hireDate"></result>
+        <association property="department" column="dept_id" javaType="department" select="com.qianfeng.mapper.DepartmentMapper.getDepartmentByDeptId"></association>
+    </resultMap>
+
+    <!--查询全部-->
+    <select id="getEmployeeList" resultMap="empMap">
+         SELECT * FROM employee ,department  WHERE employee.dept_id=department.dept_id
+    </select>
+</mapper>
